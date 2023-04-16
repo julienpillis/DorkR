@@ -9,7 +9,6 @@ def get_results(driver,query,from_page = 1,to_page = 3,url = True, url_name = Tr
     # vérifications initiales et initialisation des variables
     if(from_page>to_page):to_page=from_page
     current_page=from_page
-    end = False
 
     # création du dictionnaire à retourner
     infos = {}
@@ -19,34 +18,33 @@ def get_results(driver,query,from_page = 1,to_page = 3,url = True, url_name = Tr
 
 
     # boucle de scrapping
-    while(not end):
+    while(current_page <= to_page):
 
         url = "http://www.google.com/search?q=" + query + "&start=" + str((current_page - 1) * 10)
         driver.get(url)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-        check = soup.find_all('div', class_="mnr-c")
-        if(check==None) :
-            end = True
-        else :
-            if(url or url_name):
-                search_URL = soup.find_all('div', class_="yuRUbf")
-                for h in search_URL:
-                    link = h.a.get('href')
-                    if (url):
-                        infos['url'].append(link)
-                    if (url_name):
-                        infos['url_name'].append(h.h3.text)
+        #check = soup.find_all('div', class_="mnr-c")
 
-            if(website_name):
-                search_names = (soup.find_all('span', class_="VuuXrf"))
-                for name in search_names:
-                    infos['website'].append(name.text)
+        #if(check==None) :
+        #    end = True
+        #else :
+        if(url or url_name):
+            search_URL = soup.find_all('div', class_="yuRUbf")
+            for h in search_URL:
+                link = h.a.get('href')
+                if (url):
+                    infos['url'].append(link)
+                if (url_name):
+                    infos['url_name'].append(h.h3.text)
 
-            # vérification si arrêt imposé
-            if(to_page!=-1) :
-               end = current_page <= to_page
-            current_page+=1
+        if(website_name):
+            search_names = (soup.find_all('span', class_="VuuXrf"))
+            for name in search_names:
+                infos['website'].append(name.text)
+
+
+        current_page+=1
 
     return infos
 
@@ -86,7 +84,7 @@ if __name__=="__main__":
 
     driver = webdriver.Chrome(ChromeDriverManager().install())
 
-    print(get_results(driver,"get total number of pages google query google",from_page=1,to_page=-1,website_name=False,url_name=False))
+    print(get_results(driver,"utc",from_page=1,to_page=-1,website_name=False,url_name=False))
 
 
     # Query to obtain links
