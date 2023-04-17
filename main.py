@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
+from urllib.parse import *
 
 def get_results(driver,query,from_page = 1,to_page = 3,url = True, url_name = True,website_name = True, description = False, deep_info = False):
     """Retourne les résultats scrappés d'une requête"""
@@ -19,16 +20,17 @@ def get_results(driver,query,from_page = 1,to_page = 3,url = True, url_name = Tr
 
 
     # boucle de scrapping
-    while(not end):
+    while(current_page <= to_page and not end):
 
         url = "http://www.google.com/search?q=" + query + "&start=" + str((current_page - 1) * 10)
         driver.get(url)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
         check = soup.find_all('div', class_="mnr-c")
+
         if(check==None) :
             end = True
-        else :
+        else:
             if(url or url_name):
                 search_URL = soup.find_all('div', class_="yuRUbf")
                 for h in search_URL:
@@ -43,9 +45,6 @@ def get_results(driver,query,from_page = 1,to_page = 3,url = True, url_name = Tr
                 for name in search_names:
                     infos['website'].append(name.text)
 
-            # vérification si arrêt imposé
-            if(to_page!=-1) :
-               end = current_page <= to_page
             current_page+=1
 
     return infos
@@ -59,20 +58,36 @@ def get_location(driver,url,country = True, region = False, city=False, ip = Fal
 
     infos = {}
     url_location = "https://check-host.net/ip-info?host=" + url
+
     driver.get(url_location)
     soup = BeautifulSoup(driver.page_source, 'html.parser')
     search_location = soup.find('table', class_="hostinfo result")
     row = search_location.tbody.find_all('tr')
     if(country) :
-        infos["country"] = row[5].strong.text
+        try :
+            infos["country"] = row[5].strong.text
+        except :
+            infos["country"] = None
     if(region):
-        infos["region"] = (row[6].find_all('td'))[1].text
+        try :
+            infos["region"] = (row[6].find_all('td'))[1].text
+        except :
+            infos["region"] = None
     if(city):
-        infos["city"] = (row[7].find_all('td'))[1].text
+        try :
+            infos["city"] = (row[7].find_all('td'))[1].text
+        except :
+            infos["city"] = None
     if (ip):
-        infos["ip"] = row[0].strong.text
+        try :
+            infos["ip"] = row[0].strong.text
+        except :
+            infos["ip"] = None
 
     return infos
+
+
+
 
 def generate_csv(dataFrame):
     """Génère un fichier csv à partir d'une liste des noms de colonnes et des observations associés"""
@@ -84,52 +99,22 @@ def generate_csv(dataFrame):
 
 if __name__=="__main__":
 
+    query = input("Saisir la requête : ")
     driver = webdriver.Chrome(ChromeDriverManager().install())
+    results = get_results(driver,query,from_page=1,to_page=-1,website_name=False,url_name=False)
+    countries = []
 
-    print(get_results(driver,"get total number of pages google query google",from_page=1,to_page=-1,website_name=False,url_name=False))
+    for res in results["url"] :
+        print(urljoin(res, '/'))
+        countries.append(get_location(driver,urljoin(res, '/'))["country"])
+
+    d = pd.DataFrame()
+    for key in results:
+        d[key] = results[key]
+
+    d["location"] = countries
+
+    print(d)
 
 
-    # Query to obtain links
-    # query = 'comprehensive guide to web scraping in python'
-    # URL = [] # Initiate empty list to capture final results# Specify number of pages on google search, each page contains 10 #links
-    # website_names = []
-    # URL_names = []
-    # location = []
-    #
-    # n_pages = 20
-    # for page in range(1,3):
-    #     url = "http://www.google.com/search?q=" + query + "&start=" + str((page - 1) * 10)
-    #
-    #     driver.get(url)
-    #     soup = BeautifulSoup(driver.page_source, 'html.parser')
-    #     # soup = BeautifulSoup(r.text, 'html.parser')
-    #
-    #     search_URL = soup.find_all('div', class_="yuRUbf")
-    #     search_names = soup.find_all('span', class_="VuuXrf")
-    #
-    #
-    #
-    #     for h in search_URL:
-    #         link = h.a.get('href')
-    #         URL.append(link)
-    #         URL_names.append(h.h3.text)
-    #
-    #         url_location = "https://check-host.net/ip-info?host=" + link
-    #
-    #         driver2.get(url_location)
-    #         soup = BeautifulSoup(driver2.page_source, 'html.parser')
-    #         # soup = BeautifulSoup(r.text, 'html.parser')
-    #
-    #         search_location = soup.find('table', class_="hostinfo result")
-    #
-    #         row = search_location.tbody.find_all('tr')[5]
-    #         location.append(row.strong.text)
-    #
-    #
-    #     for name in search_names:
-    #         website_names.append(name.text)
-    #
-    #
-    #
-    # print(location)
-    # print(URL_names)
+
