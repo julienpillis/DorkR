@@ -16,8 +16,8 @@ def starting_app() :
 
     print("\n>>>> ＼(◎o◎)／！")
     time.sleep(1)
-    print(">>>> Welcome on \033[91mDorkRider\033[0m (^_^) ")
+    print(">>>> Welcome on \033[91mDorkR\033[0m (^_^) ")
     time.sleep(1)
     print(">>>> Here the stuff you'll need for your ride : \n"
-          "     \033[1mdork\033[0m : scrap the dork \n"
-          "     \033[1mexit\033[0m : exit DorkRider")
+          "     \033[1mdork\033[0m : scrap a dork \n"
+          "     \033[1mexit\033[0m : exit DorkR")
