@@ -1,4 +1,4 @@
-# DorkRider
+# DorkR
 
 
-This is the robot we are making to scrap dorks.
+This is a robot to scrap data on the web.
