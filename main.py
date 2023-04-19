@@ -20,7 +20,7 @@ if __name__=="__main__":
             driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
             print(launch_query(driver, query))
 
-    print(">>>> See yaaa pilot (づ￣ ³￣)づ ")
+    print(">>>> See yaaa (づ￣ ³￣)づ ")
     time.sleep(3)
 
 
