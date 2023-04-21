@@ -16,9 +16,11 @@ if __name__=="__main__":
     end = False
     try :
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        print("Webdriver is set. Ready to go !")
     except :
         end = True
         print("Webdriver installation failed. Please make sur you have Chrome.")
+
     while(not end):
         entry = input(">>>>? ")
         if(entry.lower()=="exit"): end = True

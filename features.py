@@ -4,7 +4,7 @@ import pandas as pd
 from urllib.parse import *
 from pathlib import Path
 
-def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,website_name = True, description = False, deep_info = False):
+def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url = True, description = False, deep_info = False):
     """Get all scrapped results"""
 
     # initialization of useful variables
@@ -13,7 +13,7 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,website_n
     end = False
 
     # initialization of the dictionary to return
-    infos = {"url" : [], "url_name" : [], "website" : []}
+    infos = {"url" : [], "url_name" : [], "short_url" : []}
 
 
     # scrapping loop
@@ -34,17 +34,15 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,website_n
                 for h in search_URL:
                     link = h.a.get('href')
                     if (url):
-                        infos['url'].append(link)
+                        try :
+                            infos['url'].append(link)
+                        except : infos['url'].append("null")
                     if (url_name):
-                        infos['url_name'].append(h.h3.text)
+                        try: infos['url_name'].append(h.h3.text)
+                        except:
+                            infos['url_name'].append("null")
 
-            if(website_name):
-                search_names = (soup.find_all('span', class_="VuuXrf"))
-                i = 0
-                for name in search_names:
-                    if(i%2==0): # trouver une solution pour gérer les doublons
-                        infos['website'].append(name.text)
-                    i+=1
+
             current_page+=1
 
     # cleaning the dictionary from empty lists
@@ -111,6 +109,8 @@ def launch_query(driver,query) :
     print("     Now getting positions !")
     add_position(driver,results)
     print("     Almost done, generating csv file...")
+    for key in results :
+        print(key + str(len(results[key])))
     generate_csv(pd.DataFrame.from_dict(results),query)
 
 
