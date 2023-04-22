@@ -6,7 +6,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 
 
-
 if __name__=="__main__":
 
 
