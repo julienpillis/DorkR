@@ -4,10 +4,11 @@ import pandas as pd
 from urllib.parse import *
 
 def get_position_params():
-    return ["url","url_name","short_url","decription","deep_info"]
+    return ["ip","country","city","region"]
+
 
 def get_results_params():
-    return ["ip","country","city","region"]
+    return ["url","url_name","short_url","description","deep_info"]
 
 
 
@@ -20,8 +21,9 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
     end = False
 
     # initialization of the dictionary to return
-    infos = {"url" : [], "url_name" : [], "short_url" : []}
-
+    #infos = {"url" : [], "url_name" : [], "short_url" : []}
+    infos = {val : [] for val in get_results_params()}
+    print(infos)
 
     # scrapping loop
     while(current_page <= to_page and not end):
@@ -138,7 +140,7 @@ def generate_csv(dataFrame,query):
     name = generate_name(query)
     try:
         dataFrame.to_csv (f'{name}.csv', index = None, header=True,encoding="utf-8-sig")
-        print(f"     \033[1m{query}.csv\033[0m has been successfully generated.")
+        print(f"     \033[1m{name}.csv\033[0m has been successfully generated.")
     except :
         print("     An error occured during the csv generation.")
 
