@@ -4,12 +4,13 @@ import pandas as pd
 from urllib.parse import *
 
 def get_position_params():
+    """Returns the full list of position parameters that are possible."""
     return ["ip","country","city","region"]
 
 
 def get_results_params():
+    """Returns the full list of result parameters that are possible."""
     return ["url","url_name","short_url","description","deep_info"]
-
 
 
 def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url = True, description = False, deep_info = False):
@@ -21,9 +22,8 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
     end = False
 
     # initialization of the dictionary to return
-    #infos = {"url" : [], "url_name" : [], "short_url" : []}
     infos = {val : [] for val in get_results_params()}
-    print(infos)
+
 
     # scrapping loop
     while(current_page <= to_page and not end):
@@ -65,7 +65,7 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
 def get_position(driver, url, country = True, region = False, city=False, ip = False):
     """ Returns information about the geolocation of the URL"""
 
-    infos = {}
+    infos = {val : [] for val in get_position_params()}
     url_location = "https://check-host.net/ip-info?host=" + url
     driver.get(url_location)
     soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -94,14 +94,19 @@ def get_position(driver, url, country = True, region = False, city=False, ip = F
         except :
             infos["ip"] = "null"
 
+    # cleaning the dictionary from empty lists
+    for key in infos.copy():
+        if len(infos[key]) < 1:
+            del infos[key]
+
     return infos
 
-def add_position(driver,results):
+def add_position(driver,results, country = True, region = False, city=False, ip = False):
     """Adding position to results"""
 
     position = {"country": [], "region": [], "city": [], "ip": []}
     for link in results["url"]:
-        pos = get_position(driver, urljoin(link, '/'), True, True, True)
+        pos = get_position(driver, urljoin(link, '/'), country,region, city, ip)
         for info in pos:
             position[info].append(pos[info])
 
@@ -113,17 +118,17 @@ def add_position(driver,results):
     results.update(position)
 
 def launch_scraping(driver,query,params) :
-
+    # Gerer les pages
     print("     Scraping begins !")
     if len(params)>0:
         results = get_results(driver,query,from_page=1,to_page=-1,url_name="url_name" in params,short_url="short_url" in params)
     else :
         results = get_results(driver, query, from_page=1, to_page=-1) # default behavior
 
-    print("     Now getting positions !")
+    if bool(set(params) & set(get_position_params())): # checking if we need to get position infos
+        print("     Now getting positions !")
+        add_position(driver,results,ip = "ip" in params,country = "country" in params,region = "region" in params,city="city" in params)
 
-
-    add_position(driver,results)
     print("     Almost done, generating csv file...")
     generate_csv(pd.DataFrame.from_dict(results),query)
 
