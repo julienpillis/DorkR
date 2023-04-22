@@ -36,7 +36,7 @@ def input_listener():
         if (len(entry) >= 2):
             if function == "dork" :
                 params_tmp = entry[1].split(')')[0].split(sep=',')
-                params = [param for param in params_tmp if param in ["country","region","city","ip","url_name","short_url","url"]]
+                params = [param for param in params_tmp if param in ["country","region","city","ip","url_name","short_url","url"] ]
     print(function)
     print(params)
     return function,params

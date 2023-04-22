@@ -14,7 +14,8 @@ def get_results_params():
 
 
 def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url = True, description = False, deep_info = False):
-    """Get all scrapped results"""
+    """Get all scrapped results
+    URL will be always scraped"""
 
     # initialization of useful variables
     if(from_page>to_page):to_page=from_page
@@ -28,8 +29,8 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
     # scrapping loop
     while(current_page <= to_page and not end):
 
-        url = "http://www.google.com/search?q=" + query + "&start=" + str((current_page - 1) * 10)
-        driver.get(url)
+        url_to_explore = "http://www.google.com/search?q=" + query + "&start=" + str((current_page - 1) * 10)
+        driver.get(url_to_explore)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
         # checking if no result
@@ -38,19 +39,18 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
             end = True
 
         else:
-            if(url or url_name):
-                search_URL = soup.find_all('div', class_="yuRUbf")
-                for h in search_URL:
-                    link = h.a.get('href')
-                    if (url):
-                        try :
-                            infos['url'].append(link)
-                        except : infos['url'].append("null")
-                    if (url_name):
-                        try: infos['url_name'].append(h.h3.text)
-                        except:
-                            infos['url_name'].append("null")
-
+            search_URL = soup.find_all('div', class_="yuRUbf")
+            for h in search_URL:
+                link = h.a.get('href')
+                try :infos['url'].append(link)
+                except : infos['url'].append("null")
+                if (url_name):
+                    try: infos['url_name'].append(h.h3.text)
+                    except:
+                        infos['url_name'].append("null")
+                if (short_url):
+                    try :infos['short_url'].append(urljoin(link, '/'))
+                    except:infos['short_url'].append("null")
 
             current_page+=1
 
