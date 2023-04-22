@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import time
 import pandas as pd
 from urllib.parse import *
-from pathlib import Path
+
 
 def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url = True, description = False, deep_info = False):
     """Get all scrapped results"""
@@ -103,7 +103,7 @@ def add_position(driver,results):
 
     results.update(position)
 
-def launch_query(driver,query) :
+def launch_scrapping(driver,query,params) :
     print("     Scrapping begins !")
     results = get_results(driver,query,from_page=1,to_page=-1)
     print("     Now getting positions !")
