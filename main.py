@@ -37,6 +37,7 @@ if __name__=="__main__":
             query = input(">>>> Insert your dork : ")
             launch_scraping(driver, query, params)
 
+    driver.quit()
     print(">>>> See yaaa (づ￣ ³￣)づ ")
     time.sleep(3)
     print()

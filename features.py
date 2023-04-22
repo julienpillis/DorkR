@@ -119,11 +119,19 @@ def add_position(driver,results, country = True, region = False, city=False, ip 
 
 def launch_scraping(driver,query,params) :
     # Gerer les pages
+    begin = 'a'
+    end = 'z'
+    while(type(begin)!=int or type(end)!=int):
+        try :
+            begin = int(input("     From page : "))
+            end = int(input("     To page : "))
+        except :
+            print("     Please enter an integer.")
     print("     Scraping begins !")
     if len(params)>0:
-        results = get_results(driver,query,from_page=1,to_page=-1,url_name="url_name" in params,short_url="short_url" in params)
+        results = get_results(driver,query,from_page=begin,to_page=end,url_name="url_name" in params,short_url="short_url" in params)
     else :
-        results = get_results(driver, query, from_page=1, to_page=-1) # default behavior
+        results = get_results(driver, query, from_page=begin, to_page=end) # default behavior
 
     if bool(set(params) & set(get_position_params())): # checking if we need to get position infos
         print("     Now getting positions !")
