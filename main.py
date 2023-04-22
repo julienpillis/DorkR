@@ -32,7 +32,7 @@ if __name__=="__main__":
         if(function=="dork"):
             query = input(">>>> Insert your dork : ")
 
-            launch_scrapping(driver, query, params)
+            launch_scraping(driver, query, params)
 
     print(">>>> See yaaa (づ￣ ³￣)づ ")
     time.sleep(3)

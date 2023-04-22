@@ -103,8 +103,8 @@ def add_position(driver,results):
 
     results.update(position)
 
-def launch_scrapping(driver,query,params) :
-    print("     Scrapping begins !")
+def launch_scraping(driver,query,params) :
+    print("     Scraping begins !")
     results = get_results(driver,query,from_page=1,to_page=-1)
     print("     Now getting positions !")
     add_position(driver,results)
