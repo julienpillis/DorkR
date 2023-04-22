@@ -3,6 +3,13 @@ import time
 import pandas as pd
 from urllib.parse import *
 
+def get_position_params():
+    return ["url","url_name","short_url","decription","deep_info"]
+
+def get_results_params():
+    return ["ip","country","city","region"]
+
+
 
 def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url = True, description = False, deep_info = False):
     """Get all scrapped results"""
@@ -104,19 +111,23 @@ def add_position(driver,results):
     results.update(position)
 
 def launch_scraping(driver,query,params) :
+
     print("     Scraping begins !")
-    results = get_results(driver,query,from_page=1,to_page=-1)
+    if len(params)>0:
+        results = get_results(driver,query,from_page=1,to_page=-1,url_name="url_name" in params,short_url="short_url" in params)
+    else :
+        results = get_results(driver, query, from_page=1, to_page=-1) # default behavior
+
     print("     Now getting positions !")
+
+
     add_position(driver,results)
     print("     Almost done, generating csv file...")
-    for key in results :
-        print(key + str(len(results[key])))
     generate_csv(pd.DataFrame.from_dict(results),query)
 
 
 def generate_name(query):
     """Generates a file name from a query """
-
     query += " " + time.asctime()
     for c in r'[]/\;,><&*:%=+@!#^()|?^ ':
         query = query.replace(c, '_')
@@ -129,5 +140,5 @@ def generate_csv(dataFrame,query):
         dataFrame.to_csv (f'{name}.csv', index = None, header=True,encoding="utf-8-sig")
         print(f"     \033[1m{query}.csv\033[0m has been successfully generated.")
     except :
-        print(" An error occured during the csv generation.")
+        print("     An error occured during the csv generation.")
 
