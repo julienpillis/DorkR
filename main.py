@@ -12,7 +12,8 @@ def input_listener():
     entry = entry.split(sep='(')
     function = entry[0]
     params = []
-    if function not in ['exit', 'dork', 'import']: print("      Bad entry. Please check your query.")
+    if function not in ['exit', 'dork', 'import']:
+        print("      Bad entry. Please check your query.")
     else :
         if (len(entry) >= 2):
             if function == "dork" :
