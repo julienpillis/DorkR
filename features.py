@@ -114,15 +114,19 @@ def launch_scraping(driver,query,params) :
     generate_csv(pd.DataFrame.from_dict(results),query)
 
 
+def generate_name(query):
+    """Generates a file name from a query """
+
+    query += " " + time.asctime()
+    for c in r'[]/\;,><&*:%=+@!#^()|?^ ':
+        query = query.replace(c, '_')
+    return query
 
 def generate_csv(dataFrame,query):
     """Generates a csv file from a query and its dataFrame"""
-
-    query += " "+ time.asctime()
+    name = generate_name(query)
     try:
-        for c in r'[]/\;,><&*:%=+@!#^()|?^ ':
-            query = query.replace(c, '_')
-        dataFrame.to_csv (f'{query}.csv', index = None, header=True,encoding="utf-8-sig")
+        dataFrame.to_csv (f'{name}.csv', index = None, header=True,encoding="utf-8-sig")
         print(f"     \033[1m{query}.csv\033[0m has been successfully generated.")
     except :
         print(" An error occured during the csv generation.")
