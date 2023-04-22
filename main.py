@@ -28,6 +28,12 @@ if __name__=="__main__":
         params = entry[1]
         if(function=="exit"): end = True
         if(function=="dork"):
+            settings = "default"
+            if(len(params)>0):
+                settings = ""
+                for p in params:
+                    settings += "* "+p+"\n"
+            print("Your dorking settings : \n"+settings)
             query = input(">>>> Insert your dork : ")
             launch_scraping(driver, query, params)
 
