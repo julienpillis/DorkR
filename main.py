@@ -4,12 +4,12 @@ from app import *
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
+import os
 
 
 if __name__=="__main__":
-
-
-    #starting_app()
+    os.getcwd()
+    starting_app()
     end = False
     try :
         options = Options()
