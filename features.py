@@ -3,9 +3,19 @@ import time
 import pandas as pd
 from urllib.parse import *
 
+def get_position_params():
+    """Returns the full list of position parameters that are possible."""
+    return ["ip","country","city","region"]
+
+
+def get_results_params():
+    """Returns the full list of result parameters that are possible."""
+    return ["url","url_name","short_url","description","deep_info"]
+
 
 def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url = True, description = False, deep_info = False):
-    """Get all scrapped results"""
+    """Get all scrapped results
+    URL will be always scraped"""
 
     # initialization of useful variables
     if(from_page>to_page):to_page=from_page
@@ -13,14 +23,14 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
     end = False
 
     # initialization of the dictionary to return
-    infos = {"url" : [], "url_name" : [], "short_url" : []}
+    infos = {val : [] for val in get_results_params()}
 
 
     # scrapping loop
     while(current_page <= to_page and not end):
 
-        url = "http://www.google.com/search?q=" + query + "&start=" + str((current_page - 1) * 10)
-        driver.get(url)
+        url_to_explore = "http://www.google.com/search?q=" + query + "&start=" + str((current_page - 1) * 10)
+        driver.get(url_to_explore)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
         # checking if no result
@@ -29,19 +39,18 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
             end = True
 
         else:
-            if(url or url_name):
-                search_URL = soup.find_all('div', class_="yuRUbf")
-                for h in search_URL:
-                    link = h.a.get('href')
-                    if (url):
-                        try :
-                            infos['url'].append(link)
-                        except : infos['url'].append("null")
-                    if (url_name):
-                        try: infos['url_name'].append(h.h3.text)
-                        except:
-                            infos['url_name'].append("null")
-
+            search_URL = soup.find_all('div', class_="yuRUbf")
+            for h in search_URL:
+                link = h.a.get('href')
+                try :infos['url'].append(link)
+                except : infos['url'].append("null")
+                if (url_name):
+                    try: infos['url_name'].append(h.h3.text)
+                    except:
+                        infos['url_name'].append("null")
+                if (short_url):
+                    try :infos['short_url'].append(urljoin(link, '/'))
+                    except:infos['short_url'].append("null")
 
             current_page+=1
 
@@ -56,7 +65,7 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
 def get_position(driver, url, country = True, region = False, city=False, ip = False):
     """ Returns information about the geolocation of the URL"""
 
-    infos = {}
+    infos = {val : [] for val in get_position_params()}
     url_location = "https://check-host.net/ip-info?host=" + url
     driver.get(url_location)
     soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -85,14 +94,19 @@ def get_position(driver, url, country = True, region = False, city=False, ip = F
         except :
             infos["ip"] = "null"
 
+    # cleaning the dictionary from empty lists
+    for key in infos.copy():
+        if len(infos[key]) < 1:
+            del infos[key]
+
     return infos
 
-def add_position(driver,results):
+def add_position(driver,results, country = True, region = False, city=False, ip = False):
     """Adding position to results"""
 
     position = {"country": [], "region": [], "city": [], "ip": []}
     for link in results["url"]:
-        pos = get_position(driver, urljoin(link, '/'), True, True, True)
+        pos = get_position(driver, urljoin(link, '/'), country,region, city, ip)
         for info in pos:
             position[info].append(pos[info])
 
@@ -103,27 +117,43 @@ def add_position(driver,results):
 
     results.update(position)
 
-def launch_scrapping(driver,query,params) :
-    print("     Scrapping begins !")
-    results = get_results(driver,query,from_page=1,to_page=-1)
-    print("     Now getting positions !")
-    add_position(driver,results)
+def launch_scraping(driver,query,params) :
+    # Gerer les pages
+    begin = 'a'
+    end = 'z'
+    while(type(begin)!=int or type(end)!=int):
+        try :
+            begin = int(input("     From page : "))
+            end = int(input("     To page : "))
+        except :
+            print("     Please enter an integer.")
+    print("     Scraping begins !")
+    if len(params)>0:
+        results = get_results(driver,query,from_page=begin,to_page=end,url_name="url_name" in params,short_url="short_url" in params)
+    else :
+        results = get_results(driver, query, from_page=begin, to_page=end) # default behavior
+
+    if bool(set(params) & set(get_position_params())): # checking if we need to get position infos
+        print("     Now getting positions !")
+        add_position(driver,results,ip = "ip" in params,country = "country" in params,region = "region" in params,city="city" in params)
+
     print("     Almost done, generating csv file...")
-    for key in results :
-        print(key + str(len(results[key])))
     generate_csv(pd.DataFrame.from_dict(results),query)
 
 
+def generate_name(query):
+    """Generates a file name from a query """
+    query += " " + time.asctime()
+    for c in r'[]/\;,><&*:%=+@!#^()|?^ ':
+        query = query.replace(c, '_')
+    return query
 
 def generate_csv(dataFrame,query):
     """Generates a csv file from a query and its dataFrame"""
-
-    query += " "+ time.asctime()
+    name = generate_name(query)
     try:
-        for c in r'[]/\;,><&*:%=+@!#^()|?^ ':
-            query = query.replace(c, '_')
-        dataFrame.to_csv (f'{query}.csv', index = None, header=True,encoding="utf-8-sig")
-        print(f"     \033[1m{query}.csv\033[0m has been successfully generated.")
+        dataFrame.to_csv (f'{name}.csv', index = None, header=True,encoding="utf-8-sig")
+        print(f"     \033[1m{name}.csv\033[0m has been successfully generated.")
     except :
-        print(" An error occured during the csv generation.")
+        print("     An error occured during the csv generation.")
 
