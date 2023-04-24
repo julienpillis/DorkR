@@ -122,6 +122,7 @@ def add_position(driver,results, country = True, region = False, city=False, ip 
         if len(position[key]) < 1:
             del position[key]
 
+    # adding positions to the dataFrame
     results.update(position)
 
 def launch_scraping(driver,query,params) :
