@@ -72,27 +72,33 @@ def get_position(driver, url, country = True, region = False, city=False, ip = F
 
     # scrapping requested infos
     search_location = soup.find('table', class_="hostinfo result")
-    row = search_location.tbody.find_all('tr')
-    if(country) :
-        try :
-            infos["country"] = row[5].strong.text
-        except :
-            infos["country"] = "null"
-    if(region):
-        try :
-            infos["region"] = (row[6].find_all('td'))[1].text
-        except :
-            infos["region"] = "null"
-    if(city):
-        try :
-            infos["city"] = (row[7].find_all('td'))[1].text
-        except :
-            infos["city"] = "null"
-    if (ip):
-        try :
-            infos["ip"] = row[0].strong.text
-        except :
-            infos["ip"] = "null"
+    if(search_location!=None):
+        row = search_location.tbody.find_all('tr')
+        if(country) :
+            try :
+                infos["country"] = row[5].strong.text
+            except :
+                infos["country"] = "null"
+        if(region):
+            try :
+                infos["region"] = (row[6].find_all('td'))[1].text
+            except :
+                infos["region"] = "null"
+        if(city):
+            try :
+                infos["city"] = (row[7].find_all('td'))[1].text
+            except :
+                infos["city"] = "null"
+        if (ip):
+            try :
+                infos["ip"] = row[0].strong.text
+            except :
+                infos["ip"] = "null"
+    else :
+        if country : infos["country"] = "null"
+        if region : infos["region"] = "null"
+        if city : infos["city"] = "null"
+        if ip : infos["ip"] = "null"
 
     # cleaning the dictionary from empty lists
     for key in infos.copy():
@@ -144,7 +150,7 @@ def launch_scraping(driver,query,params) :
 def generate_name(query):
     """Generates a file name from a query """
     query += " " + time.asctime()
-    for c in r'[]/\;,><&*:%=+@!#^()|?^ ':
+    for c in r'[]/\;,><&*:%=+@!#^()|?^" ':
         query = query.replace(c, '_')
     return query
 
@@ -156,4 +162,5 @@ def generate_csv(dataFrame,query):
         print(f"     \033[1m{name}.csv\033[0m has been successfully generated.")
     except :
         print("     An error occured during the csv generation.")
+
 
