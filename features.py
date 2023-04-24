@@ -2,6 +2,9 @@ from bs4 import BeautifulSoup
 import time
 import pandas as pd
 from urllib.parse import *
+import app
+from tqdm import tqdm
+
 
 def get_position_params():
     """Returns the full list of position parameters that are possible."""
@@ -19,16 +22,14 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
 
     # initialization of useful variables
     if(from_page>to_page):to_page=from_page
-    current_page=from_page
-    end = False
+    start_page=from_page
 
     # initialization of the dictionary to return
     infos = {val : [] for val in get_results_params()}
 
-
     # scrapping loop
-    while(current_page <= to_page and not end):
 
+    for current_page in tqdm(range(start_page,to_page),desc="Scraping pages..."):
         url_to_explore = "http://www.google.com/search?q=" + query + "&start=" + str((current_page - 1) * 10)
         driver.get(url_to_explore)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -36,7 +37,7 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
         # checking if no result
         check = soup.find_all('div', class_="mnr-c")
         if(check==None) :
-            end = True
+            break
 
         else:
             search_URL = soup.find_all('div', class_="yuRUbf")
@@ -72,27 +73,33 @@ def get_position(driver, url, country = True, region = False, city=False, ip = F
 
     # scrapping requested infos
     search_location = soup.find('table', class_="hostinfo result")
-    row = search_location.tbody.find_all('tr')
-    if(country) :
-        try :
-            infos["country"] = row[5].strong.text
-        except :
-            infos["country"] = "null"
-    if(region):
-        try :
-            infos["region"] = (row[6].find_all('td'))[1].text
-        except :
-            infos["region"] = "null"
-    if(city):
-        try :
-            infos["city"] = (row[7].find_all('td'))[1].text
-        except :
-            infos["city"] = "null"
-    if (ip):
-        try :
-            infos["ip"] = row[0].strong.text
-        except :
-            infos["ip"] = "null"
+    if(search_location!=None):
+        row = search_location.tbody.find_all('tr')
+        if(country) :
+            try :
+                infos["country"] = row[5].strong.text
+            except :
+                infos["country"] = "null"
+        if(region):
+            try :
+                infos["region"] = (row[6].find_all('td'))[1].text
+            except :
+                infos["region"] = "null"
+        if(city):
+            try :
+                infos["city"] = (row[7].find_all('td'))[1].text
+            except :
+                infos["city"] = "null"
+        if (ip):
+            try :
+                infos["ip"] = row[0].strong.text
+            except :
+                infos["ip"] = "null"
+    else :
+        if country : infos["country"] = "null"
+        if region : infos["region"] = "null"
+        if city : infos["city"] = "null"
+        if ip : infos["ip"] = "null"
 
     # cleaning the dictionary from empty lists
     for key in infos.copy():
@@ -105,7 +112,7 @@ def add_position(driver,results, country = True, region = False, city=False, ip 
     """Adding position to results"""
 
     position = {"country": [], "region": [], "city": [], "ip": []}
-    for link in results["url"]:
+    for link in tqdm(results["url"],desc="Getting positions..."):
         pos = get_position(driver, urljoin(link, '/'), country,region, city, ip)
         for info in pos:
             position[info].append(pos[info])
@@ -144,7 +151,7 @@ def launch_scraping(driver,query,params) :
 def generate_name(query):
     """Generates a file name from a query """
     query += " " + time.asctime()
-    for c in r'[]/\;,><&*:%=+@!#^()|?^ ':
+    for c in r'[]/\;,><&*:%=+@!#^()|?^"~`]°¤\' ':
         query = query.replace(c, '_')
     return query
 
@@ -156,4 +163,5 @@ def generate_csv(dataFrame,query):
         print(f"     \033[1m{name}.csv\033[0m has been successfully generated.")
     except :
         print("     An error occured during the csv generation.")
+
 

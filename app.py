@@ -6,21 +6,10 @@ def starting_app() :
     file_contents = f.read()
     print(file_contents)
     f.close()
-
-    print(">>>> (-_-)",end='')
-    time.sleep(1)
-    for i in range(3):
-        print("z",end="")
-        time.sleep(1)
-    print("\n>>>> ＼(◎o◎)／！")
-    time.sleep(1)
-    print(">>>> Welcome on \033[91mDorkR\033[0m (^_^) ")
-    time.sleep(1)
-    print(">>>> Here the stuff you'll need for your ride : \n"
-          "     \033[1mdork\033[0m(params) : scrap a dork | params : (country,region,city,ip,url_name,short_url,url)\n"
-          "     \033[1mimport\033[0m(query_file) : import your queries from a csv file \n"
-          "     \033[1mexit\033[0m : exit DorkR \n"
-          "     |--> Exhaustive list available on GitHub")
+    f = open('help.txt', 'r')
+    file_contents = f.read()
+    print(file_contents)
+    f.close()
 
 
 def input_listener():
@@ -39,3 +28,5 @@ def input_listener():
                 params = [param for param in params_tmp if param in ["country","region","city","ip","url_name","short_url","url"] ]
 
     return function,params
+
+

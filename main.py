@@ -29,15 +29,15 @@ if __name__=="__main__":
         if(function=="dork"):
             settings = "    * default (url,url_name,short_url)"
             if(len(params)>0):
-                settings = ""
+                settings = "     * url (default)\n"
                 for p in params:
-                    settings += "* "+p+"\n"
+                    settings += "    * "+p+"\n"
             print("     Your dorking settings : \n"+settings)
             query = input(">>>> Insert your dork : ")
             launch_scraping(driver, query, params)
 
     driver.quit()
-    print(">>>> See yaaa (づ￣ ³￣)づ ")
+    print(">>>> Bye bye (づ￣ ³￣)づ ")
     time.sleep(3)
     print()
 
