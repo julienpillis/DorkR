@@ -37,7 +37,7 @@ if __name__=="__main__":
             launch_scraping(driver, query, params)
 
     driver.quit()
-    print(">>>> See yaaa (づ￣ ³￣)づ ")
+    print(">>>> Bye bye (づ￣ ³￣)づ ")
     time.sleep(3)
     print()
 
