@@ -2,11 +2,11 @@ import sys
 import time
 
 def starting_app() :
-    f = open('start.txt', 'r')
+    f = open('text/start.txt', 'r')
     file_contents = f.read()
     print(file_contents)
     f.close()
-    f = open('help.txt', 'r')
+    f = open('text/help.txt', 'r')
     file_contents = f.read()
     print(file_contents)
     f.close()
