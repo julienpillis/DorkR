@@ -2,6 +2,9 @@ from bs4 import BeautifulSoup
 import time
 import pandas as pd
 from urllib.parse import *
+import app
+from tqdm import tqdm
+
 
 def get_position_params():
     """Returns the full list of position parameters that are possible."""
@@ -19,16 +22,14 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
 
     # initialization of useful variables
     if(from_page>to_page):to_page=from_page
-    current_page=from_page
-    end = False
+    start_page=from_page
 
     # initialization of the dictionary to return
     infos = {val : [] for val in get_results_params()}
 
-
     # scrapping loop
-    while(current_page <= to_page and not end):
 
+    for current_page in tqdm(range(start_page,to_page),desc="Scraping pages..."):
         url_to_explore = "http://www.google.com/search?q=" + query + "&start=" + str((current_page - 1) * 10)
         driver.get(url_to_explore)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -36,7 +37,7 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
         # checking if no result
         check = soup.find_all('div', class_="mnr-c")
         if(check==None) :
-            end = True
+            break
 
         else:
             search_URL = soup.find_all('div', class_="yuRUbf")
@@ -111,7 +112,7 @@ def add_position(driver,results, country = True, region = False, city=False, ip 
     """Adding position to results"""
 
     position = {"country": [], "region": [], "city": [], "ip": []}
-    for link in results["url"]:
+    for link in tqdm(results["url"],desc="Getting positions..."):
         pos = get_position(driver, urljoin(link, '/'), country,region, city, ip)
         for info in pos:
             position[info].append(pos[info])
