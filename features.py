@@ -151,7 +151,7 @@ def launch_scraping(driver,query,params) :
 def generate_name(query):
     """Generates a file name from a query """
     query += " " + time.asctime()
-    for c in r'[]/\;,><&*:%=+@!#^()|?^"~`]°¤ ':
+    for c in r'[]/\;,><&*:%=+@!#^()|?^"~`]°¤\' ':
         query = query.replace(c, '_')
     return query
 

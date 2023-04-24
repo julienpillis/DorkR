@@ -29,7 +29,7 @@ if __name__=="__main__":
         if(function=="dork"):
             settings = "    * default (url,url_name,short_url)"
             if(len(params)>0):
-                settings = "     * url (default)"
+                settings = "     * url (default)\n"
                 for p in params:
                     settings += "    * "+p+"\n"
             print("     Your dorking settings : \n"+settings)
