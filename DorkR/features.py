@@ -2,11 +2,10 @@ from bs4 import BeautifulSoup
 import time
 import pandas as pd
 from urllib.parse import *
-import app
 from tqdm import tqdm
 
 
-def get_position_params():
+def get_location_params():
     """Returns the full list of position parameters that are possible."""
     return ["ip","country","city","region"]
 
@@ -29,7 +28,7 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
 
     # scrapping loop
 
-    for current_page in tqdm(range(start_page,to_page),desc="Scraping pages..."):
+    for current_page in tqdm(range(start_page,to_page+1),desc="Scraping pages..."):
         url_to_explore = "http://www.google.com/search?q=" + query + "&start=" + str((current_page - 1) * 10)
         driver.get(url_to_explore)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -63,10 +62,10 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
     return infos
 
 
-def get_position(driver, url, country = True, region = False, city=False, ip = False):
+def get_location(driver, url, country = True, region = False, city=False, ip = False):
     """ Returns information about the geolocation of the URL"""
 
-    infos = {val : [] for val in get_position_params()}
+    infos = {val : [] for val in get_location_params()}
     url_location = "https://check-host.net/ip-info?host=" + url
     driver.get(url_location)
     soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -108,22 +107,22 @@ def get_position(driver, url, country = True, region = False, city=False, ip = F
 
     return infos
 
-def add_position(driver,results, country = True, region = False, city=False, ip = False):
+def add_location(driver, results, country = True, region = False, city=False, ip = False):
     """Adding position to results"""
 
-    position = {"country": [], "region": [], "city": [], "ip": []}
+    location = {"country": [], "region": [], "city": [], "ip": []}
     for link in tqdm(results["url"],desc="Getting positions..."):
-        pos = get_position(driver, urljoin(link, '/'), country,region, city, ip)
+        pos = get_location(driver, urljoin(link, '/'), country, region, city, ip)
         for info in pos:
-            position[info].append(pos[info])
+            location[info].append(pos[info])
 
     # cleaning the dictionary from empty lists
-    for key in position.copy():
-        if len(position[key]) < 1:
-            del position[key]
+    for key in location.copy():
+        if len(location[key]) < 1:
+            del location[key]
 
     # adding positions to the dataFrame
-    results.update(position)
+    results.update(location)
 
 def launch_scraping(driver,query,params) :
     # Gerer les pages
@@ -135,15 +134,13 @@ def launch_scraping(driver,query,params) :
             end = int(input("     To page : "))
         except :
             print("     Please enter an integer.")
-    print("     Scraping begins !")
     if len(params)>0:
         results = get_results(driver,query,from_page=begin,to_page=end,url_name="url_name" in params,short_url="short_url" in params)
     else :
         results = get_results(driver, query, from_page=begin, to_page=end) # default behavior
 
-    if bool(set(params) & set(get_position_params())): # checking if we need to get position infos
-        print("     Now getting positions !")
-        add_position(driver,results,ip = "ip" in params,country = "country" in params,region = "region" in params,city="city" in params)
+    if bool(set(params) & set(get_location_params())): # checking if we need to get position infos
+        add_location(driver, results, ip ="ip" in params, country ="country" in params, region ="region" in params, city="city" in params)
 
     print("     Almost done, generating csv file...")
     generate_csv(pd.DataFrame.from_dict(results),query)
