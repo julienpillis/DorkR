@@ -27,7 +27,7 @@ if __name__=="__main__":
         function = entry[0]
         params = entry[1]
         if(function=="exit"): end = True
-        if(function=="dork"):
+        elif(function=="dork"):
             settings = "    * default (url,url_name,short_url)"
             if(len(params)>0):
                 settings = "     * url (default)\n"
@@ -36,6 +36,16 @@ if __name__=="__main__":
             print("     Your dorking settings : \n"+settings)
             query = input(">>>> Insert your dork : ")
             launch_scraping(driver, query, params)
+
+        elif(function=="dork_csv"):
+            try:
+               queries = pd.read_csv(f"{params[0]}",header=None)
+               for query in queries.iloc[:,0] :
+                   launch_scraping(driver, query, params[1:])
+
+            except:
+                print("     Unable to open and/or read the file... Please check the path and/or the file format.")
+
 
     driver.quit()
     print(">>>> Bye bye (づ￣ ³￣)づ ")
