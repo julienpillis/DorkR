@@ -126,6 +126,7 @@ def add_location(driver, results, country = True, region = False, city=False, ip
 
 def launch_scraping(driver,query,params) :
     # Gerer les pages
+
     begin = 'a'
     end = 'z'
     while(type(begin)!=int or type(end)!=int):

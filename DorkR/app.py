@@ -36,4 +36,11 @@ def input_listener():
     return function,params
 
 
+def print_settings(params):
+    settings = "    * default (url,url_name,short_url)"
+    if (len(params) > 0):
+        settings = "     * url (default)\n"
+    for p in params:
+        settings += "    * " + p + "\n"
+    print("     Your dorking settings : \n" + settings)
 

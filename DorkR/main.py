@@ -28,19 +28,16 @@ if __name__=="__main__":
         params = entry[1]
         if(function=="exit"): end = True
         elif(function=="dork"):
-            settings = "    * default (url,url_name,short_url)"
-            if(len(params)>0):
-                settings = "     * url (default)\n"
-                for p in params:
-                    settings += "    * "+p+"\n"
-            print("     Your dorking settings : \n"+settings)
+            print_settings(params)
             query = input(">>>> Insert your dork : ")
             launch_scraping(driver, query, params)
 
         elif(function=="dork_csv"):
             try:
                queries = pd.read_csv(f"{params[0]}",header=None)
+               print_settings(params[1:])
                for query in queries.iloc[:,0] :
+                   print(f"     Scraping query : {params[0]}")
                    launch_scraping(driver, query, params[1:])
 
             except:
