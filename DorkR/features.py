@@ -3,6 +3,7 @@ import time
 import pandas as pd
 from urllib.parse import *
 from tqdm import tqdm
+from app import ask_pages
 
 
 def get_location_params():
@@ -20,7 +21,6 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
     URL will be always scraped"""
 
     # initialization of useful variables
-    if(from_page>to_page):to_page=from_page
     start_page=from_page
 
     # initialization of the dictionary to return
@@ -124,17 +124,14 @@ def add_location(driver, results, country = True, region = False, city=False, ip
     # adding positions to the dataFrame
     results.update(location)
 
-def launch_scraping(driver,query,params) :
-    # Gerer les pages
+def launch_scraping(driver,query,params,begin=-1,end=-1) :
 
-    begin = 'a'
-    end = 'z'
-    while(type(begin)!=int or type(end)!=int):
-        try :
-            begin = int(input("     From page : "))
-            end = int(input("     To page : "))
-        except :
-            print("     Please enter an integer.")
+    # Gerer les pages
+    if(begin==-1):
+        pages = ask_pages()
+        begin = pages[0]
+        end = pages[1]
+
     if len(params)>0:
         results = get_results(driver,query,from_page=begin,to_page=end,url_name="url_name" in params,short_url="short_url" in params)
     else :

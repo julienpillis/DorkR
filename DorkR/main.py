@@ -1,15 +1,14 @@
 from selenium.webdriver.chrome.service import Service
-from features import *
+from features import launch_scraping
+from pandas import read_csv
+from time import sleep
 from app import *
 from selenium import webdriver
-
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
-import os
 
 
 if __name__=="__main__":
-    os.getcwd()
     starting_app()
     end = False
     try :
@@ -34,11 +33,12 @@ if __name__=="__main__":
 
         elif(function=="dork_csv"):
             try:
-               queries = pd.read_csv(f"{params[0]}",header=None)
+               pages = ask_pages()
+               queries = read_csv(f"{params[0]}",header=None)
                print_settings(params[1:])
                for query in queries.iloc[:,0] :
                    print(f"     Scraping query : {params[0]}")
-                   launch_scraping(driver, query, params[1:])
+                   launch_scraping(driver, query, params[1:],pages[0],pages[1])
 
             except:
                 print("     Unable to open and/or read the file... Please check the path and/or the file format.")
@@ -46,7 +46,7 @@ if __name__=="__main__":
 
     driver.quit()
     print(">>>> Bye bye (づ￣ ³￣)づ ")
-    time.sleep(3)
+    sleep(3)
     print()
 
 
