@@ -4,6 +4,11 @@ import pandas as pd
 from urllib.parse import *
 from tqdm import tqdm
 from app import ask_pages
+import requests
+import urllib.request
+
+import shutil
+
 
 
 def get_location_params():
@@ -27,15 +32,17 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
     infos = {val : [] for val in get_results_params()}
 
     # scrapping loop
-
+    url_nb = 0
     for current_page in tqdm(range(start_page,to_page+1),desc="Scraping pages..."):
         url_to_explore = "http://www.google.com/search?q=" + query + "&start=" + str((current_page - 1) * 10)
         driver.get(url_to_explore)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
         # checking if no result
-        check = soup.find_all('div', class_="mnr-c")
-        if(check==None) :
+
+        if (soup.find_all('div', class_="g-recaptcha")!= []):
+            input("     \n\033[1m! CAPTACHA ALERT !\033 Please check reCAPTCHA. Press ENTER to continue !")
+        if(soup.find_all('div', class_="mnr-c")!=[]) :
             break
 
         else:
@@ -51,8 +58,11 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
                 if (short_url):
                     try :infos['short_url'].append(urljoin(link, '/'))
                     except:infos['short_url'].append("null")
+                #dowload_content(link,url_nb)
 
+                url_nb += 1
             current_page+=1
+
 
     # cleaning the dictionary from empty lists
     for key in infos.copy():
@@ -124,7 +134,7 @@ def add_location(driver, results, country = True, region = False, city=False, ip
     # adding positions to the dataFrame
     results.update(location)
 
-def launch_scraping(driver,query,params,begin=-1,end=-1) :
+def launch_scraping(driver,query,params,begin=-1,end=-1,gen_csv = True) :
 
     # Gerer les pages
     if(begin==-1):
@@ -140,8 +150,9 @@ def launch_scraping(driver,query,params,begin=-1,end=-1) :
     if bool(set(params) & set(get_location_params())): # checking if we need to get position infos
         add_location(driver, results, ip ="ip" in params, country ="country" in params, region ="region" in params, city="city" in params)
 
-    print("     Almost done, generating csv file...")
-    generate_csv(pd.DataFrame.from_dict(results),query)
+    if(gen_csv):
+        generate_csv(pd.DataFrame.from_dict(results),query)
+    return pd.DataFrame.from_dict(results)
 
 
 def generate_name(query):
@@ -159,5 +170,35 @@ def generate_csv(dataFrame,query):
         print(f"     \033[1m{name}.csv\033[0m has been successfully generated.")
     except :
         print("     An error occured during the csv generation.")
+
+
+def dowload_content(url,url_nb):
+
+    filename = f"url_{url_nb}"
+    try :
+        r = requests.get(url,stream=True)
+        ext = (r.headers['content-type'].split(';')[0]).split('/')[1]  # converts response headers mime type to an extension (may not work with everything)
+        if(ext.lower().replace(' ','')=="plain" or ext=="txt"):
+            ext = "txt"
+            with open("%s.%s" % (filename, ext),'w') as f:  # open the file to write as binary - replace 'wb' with 'w' for text files
+                for chunk in r.iter_content(1024):  # iterate on stream using 1KB packets
+                    f.write(chunk)  # write the file
+        else :
+            with open("%s.%s" % (filename, ext),'wb') as f:  # open the file to write as binary - replace 'wb' with 'w' for text files
+                for chunk in r.iter_content(1024):  # iterate on stream using 1KB packets
+                    f.write(chunk)  # write the file
+    except :
+        pass
+  # OR
+    try:
+        filename = f"url_{url_nb}"
+        r = requests.get(url, stream=True)
+        ext = (r.headers['content-type'].split(';')[0]).split('/')[
+            1]  # converts response headers mime type to an extension (may not work with everything)
+        if (ext.lower().replace(' ', '') == "plain" or ext == "txt"):
+            ext = "txt"
+        urllib.request.urlretrieve(url, f"{filename}.{ext}")
+    except:
+        pass
 
 

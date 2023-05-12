@@ -1,5 +1,6 @@
+import pandas as pd
 from selenium.webdriver.chrome.service import Service
-from features import launch_scraping
+from features import launch_scraping, generate_csv
 from pandas import read_csv
 from time import sleep
 from app import *
@@ -13,7 +14,12 @@ if __name__=="__main__":
     end = False
     try :
         options = Options()
-        options.add_argument("--headless")
+        #options.add_argument("--headless")
+
+        #options.binary_location = "YOUR CHROME APP PATH"
+        #driver = webdriver.Chrome(options=options,service=Service(ChromeDriverManager().install()))
+
+
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
         print("     Webdriver is set. Ready to go !")
     except :
@@ -29,18 +35,24 @@ if __name__=="__main__":
         elif(function=="dork"):
             print_settings(params)
             query = input(">>>> Insert your dork : ")
+            print(f"     Scraping query : {query}")
             launch_scraping(driver, query, params)
 
         elif(function=="dork_csv"):
             try:
+               data = pd.DataFrame()
                pages = ask_pages()
                queries = read_csv(f"{params[0]}",header=None)
                print_settings(params[1:])
                for query in queries.iloc[:,0] :
-                   print(f"     Scraping query : {params[0]}")
-                   launch_scraping(driver, query, params[1:],pages[0],pages[1])
+                   print(f"     Scraping query : {query}")
+                   res = launch_scraping(driver, query, params[1:],pages[0],pages[1],gen_csv=False)
+                   if(data.empty):data = res
+                   else : data = pd.concat([data,res])
+               generate_csv(data,"recap queries")
 
-            except:
+            except Exception as e:
+                print(e)
                 print("     Unable to open and/or read the file... Please check the path and/or the file format.")
 
 
