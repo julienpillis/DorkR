@@ -45,7 +45,7 @@ if __name__=="__main__":
                queries = read_csv(f"{params[0]}",header=None)
                print_settings(params[1:])
                for query in queries.iloc[:,0] :
-                   print(f"     Scraping query : {query}")
+                   print(f"      \nScraping query : {query}")
                    res = launch_scraping(driver, query, params[1:],pages[0],pages[1],gen_csv=False)
                    if(data.empty):data = res
                    else : data = pd.concat([data,res])
