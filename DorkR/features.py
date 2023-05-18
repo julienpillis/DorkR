@@ -6,6 +6,7 @@ from tqdm import tqdm
 from app import ask_pages
 import requests
 import urllib.request
+from tld import get_tld
 
 import shutil
 
@@ -18,10 +19,10 @@ def get_location_params():
 
 def get_results_params():
     """Returns the full list of result parameters that are possible."""
-    return ["url","url_name","short_url","description","deep_info"]
+    return ["url","url_name","short_url","description","deep_info","tld"]
 
 
-def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url = True, description = False, deep_info = False):
+def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url = True, tld=True,description = False, deep_info = False):
     """Get all scrapped results
     URL will be always scraped"""
 
@@ -58,6 +59,11 @@ def get_results(driver,query,from_page = 1,to_page = 3,url_name = True,short_url
                 if (short_url):
                     try :infos['short_url'].append(urljoin(link, '/'))
                     except:infos['short_url'].append("null")
+                if (tld):
+                    try : infos['tld'].append(get_tld(link))
+                    except : infos['tld'].append("null")
+
+
                 #dowload_content(link,url_nb)
 
                 url_nb += 1

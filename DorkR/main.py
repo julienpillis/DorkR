@@ -46,13 +46,16 @@ if __name__=="__main__":
                print_settings(params[1:])
                for query in queries.iloc[:,0] :
                    print(f"      \nScraping query : {query}")
-                   res = launch_scraping(driver, query, params[1:],pages[0],pages[1],gen_csv=False)
-                   if(data.empty):data = res
-                   else : data = pd.concat([data,res])
+                   try :
+                        res = launch_scraping(driver, query, params[1:],pages[0],pages[1],gen_csv=False)
+                        if(data.empty):data = res
+                        else : data = pd.concat([data,res])
+                   except : print(f"     \nImpossible to scrap : {query}")
                generate_csv(data,"recap queries")
 
             except Exception as e:
                 print(e)
+                generate_csv(data,"recap queries")
                 print("     Unable to open and/or read the file... Please check the path and/or the file format.")
 
 
