@@ -8,8 +8,6 @@ WARNING : The latest version of DorkR hasn't its .exe file yet...
 
 The very first version of DorkR. 
 
-It is still under developement.
-
 To use it :
 
 - Download the **DorkR.zip** file, in the section **"Releases"** (to the right)
