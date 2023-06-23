@@ -4,6 +4,8 @@ Pour découvrir le rapport du projet, [cliquez ici](https://md.picasoft.net/s/JH
 
 ## How to use DorkR
 
+WARNING : The latest version of DorkR hasn't its .exe file yet...
+
 The very first version of DorkR. 
 
 It is still under developement.
